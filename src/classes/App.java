@@ -5,20 +5,33 @@ import entity.Book;
 import entity.History;
 import entity.Reader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
 public class App {
+    List<Book> listBooks;
+    SaverToFile saverToFile;
+    
+    public App() {
+        saverToFile = new SaverToFile();
+        listBooks = new ArrayList<>();
+        listBooks.addAll(saverToFile.loadListBooks());
+    }
+    
+    
     public void run(){
 
         String operation="0";
-        boolean badOperation=false;
+        boolean badOperation;
+    
+        
         
         //-------------List------------------
-        List<Book> listBooks=new ArrayList<>();//generic list interface
+        //generic list interface
         List<Reader> listReaders=new ArrayList<>();
         List<History> listHistories=new ArrayList<>();
+        HistoryProvider historyProvider = new HistoryProvider();
+        
         //-------------SCaNNER---------------
         
         Scanner scanner = new Scanner(System.in);
@@ -34,48 +47,77 @@ public class App {
                 System.out.println("4. Возвращение книги");
                 System.out.println("5. Список книг");
                 System.out.println("6. Список читателей");
+                System.out.println();
                 
                 System.out.println("0. Выход");
                 badOperation=false;
 
                 operation=scanner.next();
                 switch (operation) {
+                
                     case "1":
                          System.out.println("1. Добавить книгу в библиотеку");
                          BookProvider bookProvider = new BookProvider();
-                         listBooks.add(bookProvider.createBook());
+                         Book book = bookProvider.createBook();
+                         if(book == null){
+                             System.out.println("Книгу добавить не удалось");
+                         }else{
+                             listBooks.add(book);
+                             saverToFile.saveBooks(listBooks);
+                             System.out.println("Добавлена новая книга");
+                         }
+                         /*listBooks.add(bookProvider.createBook());*/
                          
                         break;
                         
                     case "2":
                         System.out.println("2. Добавить читателя в список");
                         ReaderProvider readerProvider = new ReaderProvider();
-                        listReaders.add(readerProvider.createReader());
+                        Reader reader = readerProvider.createReader();
+                        if(reader == null){
+                             System.out.println("Читателя добавить не удалось");
+                         }else{
+                             listReaders.add(reader);
+                             System.out.println("Добавлен новый читатель");
+                         }
+                       
+                        /*listReaders.add(readerProvider.createReader());*/
                         break;
 
                     case "3":
                         System.out.println("3. Читатель взял книгу на дом");
                         
-                        HistoryProvider historyProvider = new HistoryProvider();
-                        listHistories.add(historyProvider.createHistory());
+                       
+                        listHistories.add(historyProvider.createHistory(listBooks,listReaders));
+                {
+                    Object history = null;
+                    if(history == null){
+                        System.out.println("Не удалось выдать книгу");
+                    }else{
+                        listHistories.add((History) history);
+                        System.out.println("Книга выдана читателю");
+                    }
+                }
                         break;
 
                     case "4":
+                  
+                        historyProvider.returnBook(listHistories);
                         System.out.println("4. Читатель вернул книгу в библиотеку");
                         break;
                         
                     case "5":
                         System.out.println("5. Список книг");
-                        for (Book book : listBooks){
-                            System.out.println(book.toString());
+                        for (Book b : listBooks){
+                            System.out.println(b.toString());
                         }
                         break;
                         
                     case "6":
                         System.out.println("5. Список Читателей");
                         
-                        for (Reader reader : listReaders){
-                            System.out.println(reader.toString());
+                        for (Reader r : listReaders){
+                            System.out.println(r.toString());
                         }
                         break;
                     case "0":
